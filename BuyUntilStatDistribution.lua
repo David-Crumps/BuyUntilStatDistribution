@@ -73,8 +73,27 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
 
         if item then
             local itemID = item.gear_id
-            ItemUtils.set_item_id_as_favorite(itemID, true)
+            --ItemUtils.set_item_id_as_favorite(itemID, true)
+            
+            local stats_rating = ItemUtils.calculate_stats_rating(item)
+
+            --[[
+            mod:echo("-------------------------------------------")
+            for i = 1, 5 do
+                local stat = item.gear.masterDataInstance.overrides.base_stats[i]
+                mod:echo("-------------------------------------------")
+                for subKey, subValue in pairs(stat) do
+                    mod:echo(tostring(subKey) .. "=" .. tostring(subValue))
+                end
+            end
+            ]]
+            mod:echo("-------------------------------------------------")
+            local test = item.gear.slots
+            for subKey, subValue in pairs(test) do
+                mod:echo(tostring(subKey) .. "=" .. tostring(subValue))
+            end
         end
+
     end
    
 end)
@@ -101,14 +120,20 @@ mod:hook(ItemUtils, "set_item_id_as_favorite", function(func, item_gear_id, stat
     end
 end)
 
-mod:hook_safe("CreditsGoodsVendorView", "_close_result_overlay", function(self)
-    mod:notify("_close_result_overlay")
-end)
-
 mod:hook_safe(Managers.event, "trigger", function(self, event_name, ...)
     if event_name == "event_vendor_view_purchased_item" then
         mod._just_purchased = true
     end
+end)
+
+--activates when switching between melee and ranged tabs
+mod:hook_safe("CreditsGoodsVendorView", "cb_switch_tab", function()
+    mod:notify("cb_switch_tab")
+end)
+
+--activates on pressing an entry in brunts armoury
+mod:hook_safe("CreditsGoodsVendorView", "cb_on_grid_entry_left_pressed", function()
+    --mod:notify("cb_on_grid_entry_left_pressed")
 end)
 
 _init()
