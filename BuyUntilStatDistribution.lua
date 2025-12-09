@@ -77,8 +77,7 @@ function mod.on_setting_changed(setting_id)
 end
 
 mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, items)
-    --has the same _close_result_overlay (thus making that function redundant)
-    
+    --does the same _close_result_overlay (thus making that function redundant)
     if self._result_overlay then
         self._result_overlay = nil
 
@@ -95,6 +94,7 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
             --ItemUtils.set_item_id_as_favorite(itemID, true)
             --THIS IS IT, ISSUE -> THE ORDERING OF THE STATS IS NOT CONSISTENT
             -- WILL NEED TO FIX
+            --OK so now instead, select a weapon, (shows stat names and passes said names to mod._stat_1 (now a list holding the value and name) -> will need to ensure they're in the correct order of course
             --REFER to search mod on how to potentially create things to enter numbers 
             local weapon_stats = WeaponStats:new(item)
             local start_expertise = ItemUtils.total_stats_value(item)
