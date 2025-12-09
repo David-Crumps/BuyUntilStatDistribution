@@ -134,6 +134,7 @@ mod:hook_safe("CreditsGoodsVendorView", "cb_on_grid_entry_left_pressed", functio
     --mod:notify("cb_on_grid_entry_left_pressed")
 end)
 
+--activates on increasing weapon stats at hadron
 mod:hook_safe(CraftingUtil, "add_weapon_expertise", function()
     mod:notify("add_weapon_expertise")
 end)
