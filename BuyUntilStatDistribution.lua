@@ -1,6 +1,7 @@
 local mod = get_mod("BuyUntilStatDistribution")
 local ItemUtils = require("scripts/utilities/items")
 local MasterItems = require("scripts/backend/master_items")
+local WeaponStats = require("scripts/utilities/weapon_stats")
 
 local MasterData = require("scripts/backend/master_data")
 local CraftingUtil = require("scripts/backend/crafting")
@@ -28,6 +29,20 @@ local function _character_save_data()
 	local character_data = character_id and save_manager and save_manager:character_data(character_id)
 
 	return character_data
+end
+
+local function _item_property_list(item)
+	local properties = {}
+
+	for i = 1, #_item_property_definitions do
+		local property_definition = _item_property_definitions[i]
+
+		if property_definition.condition(item) then
+			properties[#properties + 1] = i
+		end
+	end
+
+	return properties
 end
 
 local function total_stats()
@@ -75,22 +90,24 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
     for _, item_data in ipairs(items) do 
         local uuid = item_data.uuid
         local item = MasterItems.get_item_instance(item_data, uuid)
-
         if item then
             local itemID = item.gear_id
             --ItemUtils.set_item_id_as_favorite(itemID, true)
+            --THIS IS IT, ISSUE -> THE ORDERING OF THE STATS IS NOT CONSISTENT
+            -- WILL NEED TO FIX
+            --REFER to search mod on how to potentially create things to enter numbers 
+            local weapon_stats = WeaponStats:new(item)
+            local start_expertise = ItemUtils.total_stats_value(item)
+            local max_preview_expertise = ItemUtils.max_expertise_level() - start_expertise
+            local comparing_stats = weapon_stats:get_comparing_stats()
 
-            --[[
-            mod:echo("-------------------------------------------")
-            for i = 1, 5 do
-                local stat = item.gear.masterDataInstance.overrides
-                mod:echo("-------------------------------------------")
-                for subKey, subValue in pairs(stat) do
-                    mod:echo(tostring(subKey) .. "=" .. tostring(subValue))
-                end
+            local max_stats = ItemUtils.preview_stats_change(item, max_preview_expertise, comparing_stats)
+            mod:echo("----------------------------------------------------------------------------------")
+            mod:echo("Table keys")
+            for display_name, value in pairs(max_stats) do
+                mod:echo(display_name .. " = " .. tostring(value.value))
             end
-            --]]
-            mod:echo("--------------------------------------------------------------------")
+            
         end
 
     end   
