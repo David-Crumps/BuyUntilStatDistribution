@@ -2,6 +2,9 @@ local mod = get_mod("BuyUntilStatDistribution")
 local ItemUtils = require("scripts/utilities/items")
 local MasterItems = require("scripts/backend/master_items")
 
+local MasterData = require("scripts/backend/master_data")
+local CraftingUtil = require("scripts/backend/crafting")
+
 
 local STAT_THRESHOLD = 380
 
@@ -60,12 +63,14 @@ end
 
 mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, items)
     --has the same _close_result_overlay (thus making that function redundant)
+    
     if self._result_overlay then
         self._result_overlay = nil
 
         self:_remove_element("result_overlay")
     end
     Managers.event:trigger("event_vendor_view_purchased_item")
+    
 
     for _, item_data in ipairs(items) do 
         local uuid = item_data.uuid
@@ -74,28 +79,21 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
         if item then
             local itemID = item.gear_id
             --ItemUtils.set_item_id_as_favorite(itemID, true)
-            
-            local stats_rating = ItemUtils.calculate_stats_rating(item)
 
             --[[
             mod:echo("-------------------------------------------")
             for i = 1, 5 do
-                local stat = item.gear.masterDataInstance.overrides.base_stats[i]
+                local stat = item.gear.masterDataInstance.overrides
                 mod:echo("-------------------------------------------")
                 for subKey, subValue in pairs(stat) do
                     mod:echo(tostring(subKey) .. "=" .. tostring(subValue))
                 end
             end
-            ]]
-            mod:echo("-------------------------------------------------")
-            local test = item.gear.slots
-            for subKey, subValue in pairs(test) do
-                mod:echo(tostring(subKey) .. "=" .. tostring(subValue))
-            end
+            --]]
+            mod:echo("--------------------------------------------------------------------")
         end
 
-    end
-   
+    end   
 end)
 
 mod:hook(ItemUtils, "set_item_id_as_favorite", function(func, item_gear_id, state)
@@ -136,9 +134,9 @@ mod:hook_safe("CreditsGoodsVendorView", "cb_on_grid_entry_left_pressed", functio
     --mod:notify("cb_on_grid_entry_left_pressed")
 end)
 
+mod:hook_safe(CraftingUtil, "add_weapon_expertise", function()
+    mod:notify("add_weapon_expertise")
+end)
+
 _init()
 stat_check(true)
-
--- check calculate_stats_rating -> ALL 3 use ItemUtils use local item = MasterItems.get_item_instance(item_data, uuid) as an argument
--- check item_perk_rating -> 
--- also try item_trait_rating  ->
