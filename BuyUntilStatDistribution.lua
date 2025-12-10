@@ -5,6 +5,7 @@ local WeaponStats = require("scripts/utilities/weapon_stats")
 
 local MasterData = require("scripts/backend/master_data")
 local CraftingUtil = require("scripts/backend/crafting")
+local WeaponTempalte = require("scripts/utilities/weapon/weapon_template")
 
 
 local STAT_THRESHOLD = 380
@@ -85,31 +86,45 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
     end
     Managers.event:trigger("event_vendor_view_purchased_item")
     
-
     for _, item_data in ipairs(items) do 
         local uuid = item_data.uuid
         local item = MasterItems.get_item_instance(item_data, uuid)
         if item then
             local itemID = item.gear_id
-            --ItemUtils.set_item_id_as_favorite(itemID, true)
-            --THIS IS IT, ISSUE -> THE ORDERING OF THE STATS IS NOT CONSISTENT
-            -- WILL NEED TO FIX
-            --OK so now instead, select a weapon, (shows stat names and passes said names to mod._stat_1 (now a list holding the value and name) -> will need to ensure they're in the correct order of course
-            --REFER to search mod on how to potentially create things to enter numbers 
             local weapon_stats = WeaponStats:new(item)
+
             local start_expertise = ItemUtils.total_stats_value(item)
+
             local max_preview_expertise = ItemUtils.max_expertise_level() - start_expertise
-            local comparing_stats = weapon_stats:get_comparing_stats()
 
+            local comparing_stats = weapon_stats:get_comparing_stats() 
             local max_stats = ItemUtils.preview_stats_change(item, max_preview_expertise, comparing_stats)
-            mod:echo("----------------------------------------------------------------------------------")
-            mod:echo("Table keys")
-            for display_name, value in pairs(max_stats) do
-                mod:echo(display_name .. " = " .. tostring(value.value))
-            end
-            
-        end
 
+            local isValidWeapon = true
+            for i, stat in ipairs(comparing_stats) do
+                local user_value = 0
+                local max_stat = max_stats[stat.display_name]
+                if (i == 2) then
+                    user_value = mod["_stat_" .. 5]
+                elseif (i == 5) then
+                    user_value = mod["_stat_" .. 2]
+                else 
+                    user_value = mod["_stat_" .. i]
+                end
+
+                if max_stat then
+                    local max_value = max_stat.value or max_stat.fraction
+                    if max_value < user_value then
+                        isValidWeapon = false
+                        break
+                    end
+                end
+            end
+            if isValidWeapon then
+                ItemUtils.set_item_id_as_favorite(itemID, true)
+                mod:notify("Weapon found with requested stat profile")
+            end
+        end
     end   
 end)
 
