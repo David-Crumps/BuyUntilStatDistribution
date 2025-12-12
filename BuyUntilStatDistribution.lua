@@ -226,7 +226,7 @@ local append_to_vendor_view_defs = function(defs)
         }
         y_offset = y_offset+50
 
-        defs.widget_definitions[key] = UIWidget.create_definition(SliderPassTemplates.value_slider(520, 30, 400, true, false), key)
+        defs.widget_definitions[key] = UIWidget.create_definition(SliderPassTemplates.value_slider(520, 30, 200, true, false), key)
 
         local widget_def = defs.widget_definitions[key]
         if widget_def then
