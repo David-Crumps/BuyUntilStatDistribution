@@ -61,28 +61,10 @@ local function total_stats()
     end
     return total
 end
---THIS STAT_CHECK FUNCTION NEEDS TO BE UPDATED
---[[
-local stat_check = function(force_startup)
-    local total = total_stats()
-    if (total > STAT_THRESHOLD) then
-        if force_startup or not mod.stats_exceed then
-            mod:notify(mod.ERROR_MSG)
-            mod.stats_exceed = true
-        end
-    elseif (total <= STAT_THRESHOLD) and mod.stats_exceed then
-        mod:notify(mod.INFO_MSG)
-        mod.stats_exceed = false
-    end
-end
---]]
+
 local _init = function()
     mod._user_stats = {}
 end
-
--- to insert a new widget look at stuff searcher it does it well
--- use hook_require -> so that when the file is called it will automatically run a function we create that will add ->
--- atleast text input streams if not bars hopefully to the right of the screen along with the stat names as well.
 
 mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, items)
     --does the same _close_result_overlay (thus making that function redundant)
@@ -110,8 +92,6 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
 
             local comparing_stats = weapon_stats:get_comparing_stats() 
             local max_stats = ItemUtils.preview_stats_change(item, max_preview_expertise, comparing_stats)
-            --mod:echo("-----------------------------------------------------------------------------")
-            --mod:echo(item.__master_item.weapon_template)
 
             local isValidWeapon = true
             for i, stat in ipairs(comparing_stats) do
