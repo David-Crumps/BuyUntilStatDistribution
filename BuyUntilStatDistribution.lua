@@ -40,20 +40,6 @@ local function _character_save_data()
 	return character_data
 end
 
-local function _item_property_list(item)
-	local properties = {}
-
-	for i = 1, #_item_property_definitions do
-		local property_definition = _item_property_definitions[i]
-
-		if property_definition.condition(item) then
-			properties[#properties + 1] = i
-		end
-	end
-
-	return properties
-end
-
 local function total_stats()
     local total = 0
     for stat, data in pairs(mod._user_stats) do
