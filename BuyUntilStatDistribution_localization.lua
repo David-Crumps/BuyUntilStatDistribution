@@ -1,5 +1,5 @@
 local mod = get_mod("BuyUntilStatDistribution")
-local WeaponNames = mod:io_dofile("BuyUntilStatDistribution/weapon_names")
+
 
 return {
 	mod_name = {
@@ -7,33 +7,6 @@ return {
 	},
 	mod_description = {
 		en = "Select stats and receive a message when one with the required stats has been purchased",
-	},
-	group_select = {
-		en = "Select stat distributions",
-	},
-	stat_1 = {
-		en = "Weapon stat 1 (Damage)",
-	},
-	stat_2 = {
-		en = "Weapon stat 2",
-	},
-	stat_3 = {
-		en = "Weapon stat 3",
-	},
-	stat_4 = {
-		en = "Weapon stat 4",
-	},
-	stat_5 = {
-		en = "Weapon stat 5",
-	},
-	test_1 = {
-		en = "Test 1"
-	},
-	test_2 = {
-		en = "Test 2"
-	},
-	weapon_family = {
-		en = "Weapon Family"
 	},
 	loc_stats_display_ap_stat = {
 		en = "Penetration"
@@ -55,5 +28,74 @@ return {
 	},
 	loc_stats_display_crit_stat = {
 		en = "Critical Bonus"
+	},
+	loc_stats_display_first_saw_damage = {
+		en = "Shredder"
+	},
+	loc_stats_display_cleave_targets_stat = {
+		en = "Cleave Targets"
+	},
+	loc_stats_display_cleave_damage_stat = {
+		en = "Cleave Damage"
+	},
+	loc_stats_display_control_stat_melee = {
+		en = "Crowd Control"
+	},
+	loc_stats_display_power_output = {
+		en = "Power Output"
+	},
+	loc_stats_display_heat_management_powersword_2h = {
+		en = "Heat Management"
+	},
+	loc_stats_display_warp_resist_stat = {
+		en = "Warp Resistance"
+	},
+	loc_stats_display_ammo_stat = {
+		en = "Ammo"
+	},
+	loc_stats_display_control_stat_ranged = {
+		en = "Collateral"
+	},
+	loc_stats_display_power_stat = {
+		en = "Stopping Power"
+	},
+	loc_stats_display_stability_stat = {
+		en = "Stability"
+	},
+	loc_stats_display_reload_speed_stat = {
+		en = "Reload Speed"
+	},
+	loc_stats_display_burn_stat = {
+		en = "Burn"
+	},
+	loc_stats_display_flame_size_stat = {
+		en = "Cloud Radius"
+	},
+	loc_stats_display_range_stat = {
+		en = "Range"
+	},
+	loc_stats_display_explosion_stat = {
+		en = "Blast Radius"
+	},
+	loc_stats_display_explosion_damage_stat = {
+		en = "Blast Damage"
+	},
+	loc_stats_display_explosion_ap_stat = {
+		en = "Penetration (Blast)"
+	},
+	loc_glossary_term_melee_damage = {
+		en = "Melee Damage"
+	},
+	loc_stats_display_vent_speed =  {
+		en = "Quell Speed"
+	},
+	loc_stats_display_charge_speed = {
+		en = "Charge Rate"
+	},
+	loc_stats_display_heat_management = {
+		en = "Thermal Resistance"
+	},
+	loc_stats_display_power_output_powermaul_shield_p1 = {
+		en = "Power Output"
 	}
 }

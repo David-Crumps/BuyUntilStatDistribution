@@ -2,17 +2,10 @@ local mod = get_mod("BuyUntilStatDistribution")
 local ItemUtils = require("scripts/utilities/items")
 local MasterItems = require("scripts/backend/master_items")
 local WeaponStats = require("scripts/utilities/weapon_stats")
-
---local WeaponTemplate = require("scripts/utilities/weapon/weapon_template")
 local WeaponTemplates = require("scripts/settings/equipment/weapon_templates/weapon_templates")
-
 local UIRenderer = require("scripts/managers/ui/ui_renderer")
 local UIWidget = require("scripts/managers/ui/ui_widget")
-local UISoundEvents = require("scripts/settings/ui/ui_sound_events")
-
-local TextInputPassTemplates = require("scripts/ui/pass_templates/text_input_pass_templates")
 local SliderPassTemplates = require("scripts/ui/pass_templates/slider_pass_templates")
-local UIFontSettings = require("scripts/managers/ui/ui_font_settings")
 
 local STAT_THRESHOLD = 380
 local NUMBER_OF_STATS = 5
@@ -82,7 +75,7 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
             local isValidWeapon = true
             for i, stat in ipairs(comparing_stats) do
                 local user_stat = mod._user_stats[stat.display_name]
-                if user_stat then
+                if user_stat then --this should be checking for user_stat and that there is a user_stat.value
                     local purchased_max_value = max_stats[stat.display_name]
                     if purchased_max_value then
                         local max_value = purchased_max_value.value or purchased_max_value.fraction
@@ -112,7 +105,7 @@ mod:hook(ItemUtils, "set_item_id_as_favorite", function(func, item_gear_id, stat
         end
 
         if not character_data.favorite_items then
-        character_data.favorite_items = {}
+            character_data.favorite_items = {}
         end
 
         local favorite_items = character_data.favorite_items
@@ -131,24 +124,23 @@ mod:hook_safe(Managers.event, "trigger", function(self, event_name, ...)
 end)
 
 mod:hook_safe("CreditsGoodsVendorView", "_preview_item", function(self, item)
+    --if the length of weapon_stats.base_stats == NUMBER_OF_STATS then continue else cancel
     mod._selected_weapon = item.weapon_template
     local weapon_stats = WeaponTemplates[mod._selected_weapon]
     _init()
     local slider_val = 1
-    local count = 0
     for _, stat_data in pairs(weapon_stats.base_stats) do
         mod._user_stats[stat_data.display_name] = {slider = "slider_"..slider_val, value = 0}
         slider_val = slider_val+1
-        count = count+1
     end
-    --This needs to be there
+
     for stat, data in pairs(mod._user_stats) do
         local slider = self._widgets_by_name[data.slider]
 
         if slider then
             local content = slider.content
             content.slider_value = data.value
-            content.value_text = mod:localize(stat) .. ":" .. tostring(data.value)
+            content.value_text = mod:localize(stat) .. ": " .. tostring(data.value)
         end
     end
 end)
@@ -192,7 +184,7 @@ local append_to_vendor_view_defs = function(defs)
         }
         y_offset = y_offset+50
 
-        defs.widget_definitions[key] = UIWidget.create_definition(SliderPassTemplates.value_slider(520, 30, 200, true, false), key)
+        defs.widget_definitions[key] = UIWidget.create_definition(SliderPassTemplates.value_slider(520, 30, 270, true, false), key)
 
         local widget_def = defs.widget_definitions[key]
         if widget_def then
