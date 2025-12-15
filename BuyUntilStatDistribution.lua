@@ -91,6 +91,7 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
                 end
             end
             if isValidWeapon then
+                mod._just_purchased = true
                 ItemUtils.set_item_id_as_favorite(itemID, true)
                 mod:notify("WEAPON FOUND WITH REQUESTED STAT PROFILE")
             end
@@ -117,13 +118,6 @@ mod:hook(ItemUtils, "set_item_id_as_favorite", function(func, item_gear_id, stat
         Managers.save:queue_save()
     else --otherwise play the sound
         func(item_gear_id, state)
-    end
-end)
-
-mod:hook_safe(Managers.event, "trigger", function(self, event_name, ...)
-    if event_name == "event_vendor_view_purchased_item" then
-        --THIS SHOULDNT BE HERE -> set to true IF THE WEAPON IS TO BE FAVOURITED OTHERWISE FALSE
-        mod._just_purchased = true
     end
 end)
 
