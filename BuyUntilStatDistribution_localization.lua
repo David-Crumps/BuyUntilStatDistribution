@@ -95,5 +95,7 @@ return {
 	loc_stats_display_heat_management = {
 		en = "Thermal Resistance"
 	},
-	
+	loc_stats_display_power_output_powermaul_shield_p1 = {
+		en = "Power Output"
+	}
 }
