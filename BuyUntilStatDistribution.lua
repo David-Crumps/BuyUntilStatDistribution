@@ -50,13 +50,14 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
         mod:echo("ERROR: no user stats detected, defaulting to normal purchase")
         return
     end
-    --does the same _close_result_overlay (thus making that function redundant)
+    
     if self._result_overlay then
         self._result_overlay = nil
 
         self:_remove_element("result_overlay")
     end
     Managers.event:trigger("event_vendor_view_purchased_item")
+
     if total_stats() > STAT_THRESHOLD then 
         mod:echo(mod.ERROR_MSG)
         return
@@ -70,7 +71,6 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
             local weapon_stats = WeaponStats:new(item)
 
             local start_expertise = ItemUtils.total_stats_value(item)
-
             local max_preview_expertise = ItemUtils.max_expertise_level() - start_expertise
 
             local comparing_stats = weapon_stats:get_comparing_stats() 
@@ -79,7 +79,7 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
             local isValidWeapon = true
             for i, stat in ipairs(comparing_stats) do
                 local user_stat = mod._user_stats[stat.display_name]
-                if user_stat then --this should be checking for user_stat and that there is a user_stat.value
+                if user_stat and user_stat.value then 
                     local purchased_max_value = max_stats[stat.display_name]
                     if purchased_max_value then
                         local max_value = purchased_max_value.value or purchased_max_value.fraction
