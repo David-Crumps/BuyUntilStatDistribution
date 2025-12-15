@@ -46,6 +46,10 @@ local _init = function()
 end
 
 mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, items)
+    if next(mod._user_stats) == nil then
+        mod:echo("ERROR: no user stats detected, defaulting to normal purchase")
+        return
+    end
     --does the same _close_result_overlay (thus making that function redundant)
     if self._result_overlay then
         self._result_overlay = nil
@@ -124,14 +128,21 @@ mod:hook_safe(Managers.event, "trigger", function(self, event_name, ...)
 end)
 
 mod:hook_safe("CreditsGoodsVendorView", "_preview_item", function(self, item)
-    --if the length of weapon_stats.base_stats == NUMBER_OF_STATS then continue else cancel
     mod._selected_weapon = item.weapon_template
     local weapon_stats = WeaponTemplates[mod._selected_weapon]
     _init()
     local slider_val = 1
+    local count = 0
     for _, stat_data in pairs(weapon_stats.base_stats) do
         mod._user_stats[stat_data.display_name] = {slider = "slider_"..slider_val, value = 0}
         slider_val = slider_val+1
+        count = count + 1
+    end
+    -- check, if the number of stats found on the weapon exceed the expected number of stats.
+    if count ~= NUMBER_OF_STATS then
+        mod:echo("ERROR: Number of stats on weapon exceed, total expected stats")
+        _init()
+        return
     end
 
     for stat, data in pairs(mod._user_stats) do
