@@ -121,7 +121,7 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
             mod._num_aquired_items = mod._num_aquired_items+1
         end
     end
-    mod:echo(mod._num_aquired_items)
+
     if mod._weapon_found and _is_less_than_bulk_quantity() and not mod._cancel_auto_buy then
         self:_update_button_disable_state()
         self:_cb_on_purchase_pressed()
