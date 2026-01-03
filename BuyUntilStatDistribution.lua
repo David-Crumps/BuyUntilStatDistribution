@@ -245,15 +245,16 @@ mod:hook_safe("CreditsGoodsVendorView", "_preview_element", function(self)
     local price_icon_widget = widgets.price_icon
 
     local price_total = ""
-
+    price_text_widget.style.text.size = {200, 50}
+    price_text_widget.style.text.offset[1] = -50
+    price_icon_widget.style.texture.offset[1] = 50
     if _is_enabled() then 
         price_total = " (" .. price * mod._bulk_quantity .. ")"
 
-        price_text_widget.style.text.size = {200, 50}
         price_text_widget.content.text = price_text_widget.content.text .. price_total
 
-        price_text_widget.style.text.offset[1] = -50
-        price_icon_widget.style.texture.offset[1] = 50
+    else
+        price_text_widget.content.text = "Auto Purchase"
     end
 
 end)
