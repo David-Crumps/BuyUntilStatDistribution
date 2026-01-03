@@ -22,6 +22,8 @@ mod.stats_exceed = false
 mod.INFO_MSG = "INFO: Stats fall within acceptable range"
 mod.ERROR_MSG = "ERROR: total stat distribution exceeds threshold of " .. STAT_THRESHOLD .. "!"
 
+mod._bulk_quantity = mod:get("bulk_quantity")
+
 local function _character_save_data()
 	local local_player_id = 1
 	local player_manager = Managers.player
@@ -43,7 +45,17 @@ end
 
 local _init = function()
     mod._user_stats = {}
+    mod._bulk_quantity = mod:get("bulk_quantity")
+
 end
+
+local _is_enabled = function()
+    return mod:get("enable_bulk_purchase")
+end
+
+mod:hook_safe("CreditGoodsVendorView", "init", function()
+    _init()
+end)
 
 mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, items)
     if next(mod._user_stats) == nil then
@@ -200,6 +212,28 @@ local append_to_vendor_view_defs = function(defs)
         end
     end
 end
+
+mod:hook_safe("CreditsGoodsVendorView", "_preview_element", function(self)
+    local offer = self._previewed_offer
+    local price = offer.price.amount.amount or 0
+
+    local widgets = self._widgets_by_name
+    local price_text_widget = widgets.price_text
+    local price_icon_widget = widgets.price_icon
+
+    local price_total = ""
+
+    if _is_enabled() then 
+        price_total = " (" .. price * mod._bulk_quantity .. ")"
+        
+        price_text_widget.style.text.size = {200, 50}
+        price_text_widget.content.text = price_text_widget.content.text .. price_total
+
+        price_text_widget.style.text.offset[1] = -50
+        price_icon_widget.style.texture.offset[1] = 50
+    end
+
+end)
 
 mod:hook_require(views.."credits_goods_vendor_view/credits_goods_vendor_view_definitions", append_to_vendor_view_defs)
 _init()

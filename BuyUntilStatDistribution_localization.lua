@@ -2,6 +2,15 @@ local mod = get_mod("BuyUntilStatDistribution")
 
 
 return {
+	bulk_purchase = {
+		en = "Bulk Purchase"
+	},
+	enable_bulk_purchase = {
+		en = "Enable Bulk Purchase"
+	},
+	bulk_quantity = {
+		en = "Quantity"
+	},
 	mod_name = {
 		en = "Buy Until Stat Distribution",
 	},
