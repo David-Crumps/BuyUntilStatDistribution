@@ -113,6 +113,11 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
                     end
                 end
             end
+            if not mod._invalid_weapon_found then
+                mod._just_purchased = true
+                ItemUtils.set_item_id_as_favorite(itemID, true)
+                mod:notify("WEAPON FOUND WITH REQUESTED STAT PROFILE")
+            end
             mod._num_aquired_items = mod._num_aquired_items+1
         end
     end
@@ -125,13 +130,6 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
             mod:notify("Canceled Auto Buy")
             mod._cancel_auto_buy = false
         end
-
-        if not mod._invalid_weapon_found then
-            mod._just_purchased = true
-            ItemUtils.set_item_id_as_favorite(itemID, true)
-            mod:notify("WEAPON FOUND WITH REQUESTED STAT PROFILE")
-        end
-
         mod._num_aquired_items = 0
     end    
 end)
