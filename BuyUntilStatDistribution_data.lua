@@ -7,6 +7,14 @@ return {
 	options = {
 		widgets = {
 			{
+				setting_id = "cancel_auto_buy",
+				type = "keybind",
+				default_value = {},
+				keybind_trigger = "pressed",
+				keybind_type = "function_call",
+				function_name = "cancel_auto_buy",
+			},
+			{
 				setting_id = "bulk_purchase",
 				type = "group",
 				sub_widgets = {

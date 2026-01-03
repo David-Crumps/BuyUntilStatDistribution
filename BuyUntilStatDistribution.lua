@@ -16,6 +16,8 @@ mod._just_purchased = false
 mod._user_stats = {}
 
 mod._selected_weapon = ""
+mod._weapon_found = false
+mod._num_aquired_items = 0
 
 
 mod.stats_exceed = false
@@ -23,6 +25,7 @@ mod.INFO_MSG = "INFO: Stats fall within acceptable range"
 mod.ERROR_MSG = "ERROR: total stat distribution exceeds threshold of " .. STAT_THRESHOLD .. "!"
 
 mod._bulk_quantity = mod:get("bulk_quantity")
+mod._cancel_auto_buy = false
 
 local function _character_save_data()
 	local local_player_id = 1
@@ -44,13 +47,22 @@ local function total_stats()
 end
 
 local _init = function()
+    mod._cancel_auto_buy = false
     mod._user_stats = {}
+    mod._weapon_found = false
     mod._bulk_quantity = mod:get("bulk_quantity")
-
+    mod._num_aquired_items = 0
 end
 
 local _is_enabled = function()
     return mod:get("enable_bulk_purchase")
+end
+
+local _is_less_than_bulk_quantity = function()
+    if _is_enabled() then
+        return mod._num_aquired_items < mod._bulk_quantity
+    end
+    return true
 end
 
 mod:hook_safe("CreditGoodsVendorView", "init", function()
@@ -88,7 +100,6 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
             local comparing_stats = weapon_stats:get_comparing_stats() 
             local max_stats = ItemUtils.preview_stats_change(item, max_preview_expertise, comparing_stats)
 
-            local isValidWeapon = true
             for i, stat in ipairs(comparing_stats) do
                 local user_stat = mod._user_stats[stat.display_name]
                 if user_stat and user_stat.value then 
@@ -96,19 +107,31 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
                     if purchased_max_value then
                         local max_value = purchased_max_value.value or purchased_max_value.fraction
                         if max_value < user_stat.value then
-                            isValidWeapon = false
+                            mod._weapon_found = true
                             break
                         end
                     end
                 end
             end
-            if isValidWeapon then
+            if not mod._weapon_found then
                 mod._just_purchased = true
                 ItemUtils.set_item_id_as_favorite(itemID, true)
                 mod:notify("WEAPON FOUND WITH REQUESTED STAT PROFILE")
             end
+            mod._num_aquired_items = mod._num_aquired_items+1
         end
-    end   
+    end
+    mod:echo(mod._num_aquired_items)
+    if mod._weapon_found and _is_less_than_bulk_quantity() and not mod._cancel_auto_buy then
+        self:_update_button_disable_state()
+        self:_cb_on_purchase_pressed()
+    else
+        if mod._cancel_auto_buy then
+            mod:notify("Canceled Auto Buy")
+            mod._cancel_auto_buy = false
+        end
+        mod._num_aquired_items = 0
+    end    
 end)
 
 mod:hook(ItemUtils, "set_item_id_as_favorite", function(func, item_gear_id, state)
@@ -134,9 +157,9 @@ mod:hook(ItemUtils, "set_item_id_as_favorite", function(func, item_gear_id, stat
 end)
 
 mod:hook_safe("CreditsGoodsVendorView", "_preview_item", function(self, item)
+    _init()
     mod._selected_weapon = item.weapon_template
     local weapon_stats = WeaponTemplates[mod._selected_weapon]
-    _init()
     local slider_val = 1
     local count = 0
     for _, stat_data in pairs(weapon_stats.base_stats) do
@@ -225,7 +248,7 @@ mod:hook_safe("CreditsGoodsVendorView", "_preview_element", function(self)
 
     if _is_enabled() then 
         price_total = " (" .. price * mod._bulk_quantity .. ")"
-        
+
         price_text_widget.style.text.size = {200, 50}
         price_text_widget.content.text = price_text_widget.content.text .. price_total
 
@@ -235,5 +258,14 @@ mod:hook_safe("CreditsGoodsVendorView", "_preview_element", function(self)
 
 end)
 
+mod:hook_safe("CreditsGoodsVendorView", "_cb_on_purchase_pressed", function(self)
+    mod._weapon_found = false
+end)
+
 mod:hook_require(views.."credits_goods_vendor_view/credits_goods_vendor_view_definitions", append_to_vendor_view_defs)
+
+mod.cancel_auto_buy = function()
+    mod._cancel_auto_buy = true
+end
+
 _init()

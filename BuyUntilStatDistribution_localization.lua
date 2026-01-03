@@ -2,6 +2,9 @@ local mod = get_mod("BuyUntilStatDistribution")
 
 
 return {
+	cancel_auto_buy = {
+		en = "Cancel Auto Buy"
+	},
 	bulk_purchase = {
 		en = "Bulk Purchase"
 	},
