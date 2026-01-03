@@ -16,7 +16,7 @@ mod._just_purchased = false
 mod._user_stats = {}
 
 mod._selected_weapon = ""
-mod._weapon_found = false
+mod._invalid_weapon_found = false
 mod._num_aquired_items = 0
 
 
@@ -49,7 +49,7 @@ end
 local _init = function()
     mod._cancel_auto_buy = false
     mod._user_stats = {}
-    mod._weapon_found = false
+    mod._invalid_weapon_found = false
     mod._bulk_quantity = mod:get("bulk_quantity")
     mod._num_aquired_items = 0
 end
@@ -107,22 +107,17 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
                     if purchased_max_value then
                         local max_value = purchased_max_value.value or purchased_max_value.fraction
                         if max_value < user_stat.value then
-                            mod._weapon_found = true
+                            mod._invalid_weapon_found = true
                             break
                         end
                     end
                 end
             end
-            if not mod._weapon_found then
-                mod._just_purchased = true
-                ItemUtils.set_item_id_as_favorite(itemID, true)
-                mod:notify("WEAPON FOUND WITH REQUESTED STAT PROFILE")
-            end
             mod._num_aquired_items = mod._num_aquired_items+1
         end
     end
 
-    if mod._weapon_found and _is_less_than_bulk_quantity() and not mod._cancel_auto_buy then
+    if mod._invalid_weapon_found and _is_less_than_bulk_quantity() and not mod._cancel_auto_buy then
         self:_update_button_disable_state()
         self:_cb_on_purchase_pressed()
     else
@@ -130,6 +125,13 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
             mod:notify("Canceled Auto Buy")
             mod._cancel_auto_buy = false
         end
+
+        if not mod._invalid_weapon_found then
+            mod._just_purchased = true
+            ItemUtils.set_item_id_as_favorite(itemID, true)
+            mod:notify("WEAPON FOUND WITH REQUESTED STAT PROFILE")
+        end
+
         mod._num_aquired_items = 0
     end    
 end)
@@ -259,7 +261,7 @@ mod:hook_safe("CreditsGoodsVendorView", "_preview_element", function(self)
 end)
 
 mod:hook_safe("CreditsGoodsVendorView", "_cb_on_purchase_pressed", function(self)
-    mod._weapon_found = false
+    mod._invalid_weapon_found = false
 end)
 
 mod:hook_require(views.."credits_goods_vendor_view/credits_goods_vendor_view_definitions", append_to_vendor_view_defs)
