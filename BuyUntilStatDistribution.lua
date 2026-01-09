@@ -21,11 +21,11 @@ mod._num_aquired_items = 0
 
 
 mod.stats_exceed = false
-mod.INFO_MSG = "INFO: Stats fall within acceptable range"
-mod.ERROR_MSG = "ERROR: total stat distribution exceeds threshold of " .. STAT_THRESHOLD .. "!"
 
 mod._bulk_quantity = mod:get("bulk_quantity")
 mod._cancel_auto_buy = false
+
+mod._cancel_auto_buy_keybind = mod:get("cancel_auto_buy")
 
 local function _character_save_data()
 	local local_player_id = 1
@@ -47,6 +47,7 @@ local function total_stats()
 end
 
 local _init = function()
+    mod._cancel_auto_buy_keybind = mod:get("cancel_auto_buy")
     mod._cancel_auto_buy = false
     mod._user_stats = {}
     mod._invalid_weapon_found = false
@@ -69,12 +70,7 @@ mod:hook_safe("CreditGoodsVendorView", "init", function()
     _init()
 end)
 
-mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, items)
-    if next(mod._user_stats) == nil then
-        mod:echo("ERROR: no user stats detected, defaulting to normal purchase")
-        return
-    end
-    
+mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, items)    
     if self._result_overlay then
         self._result_overlay = nil
 
@@ -82,11 +78,6 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
     end
     Managers.event:trigger("event_vendor_view_purchased_item")
 
-    if total_stats() > STAT_THRESHOLD then 
-        mod:echo(mod.ERROR_MSG)
-        return
-    end
-    
     for _, item_data in ipairs(items) do 
         local uuid = item_data.uuid
         local item = MasterItems.get_item_instance(item_data, uuid)
@@ -259,8 +250,24 @@ mod:hook_safe("CreditsGoodsVendorView", "_preview_element", function(self)
 
 end)
 
-mod:hook_safe("CreditsGoodsVendorView", "_cb_on_purchase_pressed", function(self)
+mod:hook("CreditsGoodsVendorView", "_cb_on_purchase_pressed", function(func, self, ...)
+    if not mod.user_stats or next(mod._user_stats) == nil then
+        mod:echo("ERROR: user stats not detected, if issue persists disable mod")
+        return
+    end
+
+    if total_stats() > STAT_THRESHOLD then
+        mod:echo("ERROR: total stat distribution exceeds threshold of " .. STAT_THRESHOLD .. "!")
+        return
+    end
+
+    if (not _is_enabled()) and (not mod._cancel_auto_buy_keybind or mod._cancel_auto_buy_keybind[1] == nil) then
+        mod:echo("ERROR: please enter a cancel autobuy keybind before auto purchasing")
+        return
+    end
+
     mod._invalid_weapon_found = false
+    func(self, ...)
 end)
 
 mod:hook_require(views.."credits_goods_vendor_view/credits_goods_vendor_view_definitions", append_to_vendor_view_defs)
@@ -270,3 +277,4 @@ mod.cancel_auto_buy = function()
 end
 
 _init()
+
