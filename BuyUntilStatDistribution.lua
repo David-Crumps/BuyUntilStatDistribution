@@ -251,7 +251,7 @@ mod:hook_safe("CreditsGoodsVendorView", "_preview_element", function(self)
 end)
 
 mod:hook("CreditsGoodsVendorView", "_cb_on_purchase_pressed", function(func, self, ...)
-    if not mod.user_stats or next(mod._user_stats) == nil then
+    if not mod._user_stats or next(mod._user_stats) == nil then
         mod:echo("ERROR: user stats not detected, if issue persists disable mod")
         return
     end
