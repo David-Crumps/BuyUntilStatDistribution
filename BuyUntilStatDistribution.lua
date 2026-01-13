@@ -18,6 +18,8 @@ mod._user_stats = {}
 mod._selected_weapon = ""
 mod._invalid_weapon_found = false
 mod._num_aquired_items = 0
+mod._items_to_delete = {}
+mod._auto_delete = mod:get("auto_delete")
 
 
 mod.stats_exceed = false
@@ -48,10 +50,20 @@ end
 
 local _init = function()
     mod._cancel_auto_buy_keybind = mod:get("cancel_auto_buy")
-    mod._cancel_auto_buy = false
-    mod._user_stats = {}
-    mod._invalid_weapon_found = false
     mod._bulk_quantity = mod:get("bulk_quantity")
+    mod._auto_delete = mod:get("auto_delete")
+
+    mod._cancel_auto_buy = false
+    mod._invalid_weapon_found = false
+
+    mod._user_stats = {}
+    mod._items_to_delete = {}
+
+    mod._num_aquired_items = 0
+end
+
+local _reset_flags = function ()
+    mod._items_to_delete = {}
     mod._num_aquired_items = 0
 end
 
@@ -64,6 +76,44 @@ local _is_less_than_bulk_quantity = function()
         return mod._num_aquired_items < mod._bulk_quantity
     end
     return true
+end
+
+local _delete_items = function()
+    local delete_promise = Managers.data_service.gear:delete_gear_batch(mod._items_to_delete)
+
+    mod._delete_promise = delete_promise
+
+    delete_promise:next(function(result)
+        local total_rewards = {}
+
+        if result then
+            for i = 1, #result do
+                local operation = result[i]
+                local rewards = operation.rewards
+
+                for i = 1, #rewards do
+                    local reward = rewards[i]
+                    local reward_type = reward.type
+                    total_rewards[reward_type] = (total_rewards[reward_type] or 0) + reward.amount
+                end
+            end
+        end
+
+        if not table.is_empty(total_rewards) then
+            Managers.event:trigger("event_vendor_view_purchased_item")
+
+            for reward_type, reward_amount in pairs(total_rewards) do
+                Managers.event:trigger("event_add_notification_message", "currency", {
+                    currency = reward_type,
+                    amount = reward_amount
+                })
+            end
+        end
+
+        mod._delete_promise = nil
+    end):catch(function(e)
+        mod._delete_promise = nil
+    end)
 end
 
 mod:hook_safe("CreditGoodsVendorView", "init", function()
@@ -104,12 +154,14 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
                     end
                 end
             end
+            mod._num_aquired_items = mod._num_aquired_items+1
             if not mod._invalid_weapon_found then
                 mod._just_purchased = true
                 ItemUtils.set_item_id_as_favorite(itemID, true)
                 mod:notify("WEAPON FOUND WITH REQUESTED STAT PROFILE")
+            else
+                mod._items_to_delete[mod._num_aquired_items] = itemID
             end
-            mod._num_aquired_items = mod._num_aquired_items+1
         end
     end
 
@@ -121,7 +173,13 @@ mod:hook_safe("CreditsGoodsVendorView", "_on_purchase_complete", function(self, 
             mod:notify("Canceled Auto Buy")
             mod._cancel_auto_buy = false
         end
-        mod._num_aquired_items = 0
+        if mod._auto_delete and next(mod._items_to_delete) ~= nil then
+            _delete_items()
+        end
+        if not mod._invalid_weapon_found then
+            mod:notify("Weapon found in " .. mod._num_aquired_items .. " purchases")
+        end
+        _reset_flags()
     end    
 end)
 
@@ -276,5 +334,4 @@ mod.cancel_auto_buy = function()
     mod._cancel_auto_buy = true
 end
 
-_init()
 

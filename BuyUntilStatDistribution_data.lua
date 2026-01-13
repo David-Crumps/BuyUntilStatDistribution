@@ -15,6 +15,11 @@ return {
 				function_name = "cancel_auto_buy",
 			},
 			{
+				setting_id = "auto_delete",
+				type = "checkbox",
+				default_value = true,
+			},
+			{
 				setting_id = "bulk_purchase",
 				type = "group",
 				sub_widgets = {

@@ -20,6 +20,9 @@ return {
 	mod_description = {
 		en = "Select stats and receive a message when one with the required stats has been purchased",
 	},
+	auto_delete = {
+		en = "Auto Delete"
+	},
 	loc_stats_display_ap_stat = {
 		en = "Penetration"
 	},
